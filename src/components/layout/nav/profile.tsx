@@ -2,7 +2,7 @@
 
 /* eslint-disable @next/next/no-img-element */
 import { useSession, signOut } from "next-auth/react";
-import { Loader2, LogOut } from "lucide-react";
+import { LayoutDashboard, Loader2, LogOut } from "lucide-react";
 
 import Link from "next/link";
 
@@ -22,7 +22,7 @@ export default function Profile() {
   if (status === "unauthenticated") {
     return (
       <div>
-        <Link href="/api/auth/signin">
+        <Link href="/auth/signin">
           <Button variant="outline">Login</Button>
         </Link>
       </div>
@@ -56,13 +56,27 @@ export default function Profile() {
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>
-            Hi {session?.user?.name?.split(" ")[0]}!
+          <DropdownMenuLabel className="p-5 flex gap-4">
+            <img
+              src={session?.user?.image ?? ""}
+              alt="profile imge"
+              className="w-10 h-10 rounded-full overflow-hidden"
+            />
+            <div>
+              <p>{session.user.name}</p>
+              <p className="opacity-60 font-normal">{session.user.email}</p>
+            </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
+          <Link href="/dashboard">
+            <DropdownMenuItem>
+              <LayoutDashboard className="mr-3" />
+              Dashboard
+            </DropdownMenuItem>
+          </Link>
           <DropdownMenuItem onClick={handleLogout}>
             <LogOut className="mr-3" />
-            Logout
+            Sign out
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
