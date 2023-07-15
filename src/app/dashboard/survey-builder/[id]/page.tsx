@@ -1,23 +1,37 @@
-"use server";
-
+import GroupBuilder from "@/components/dashboard/survey-builder/group-builder";
 import ModifySurveyForm from "@/components/dashboard/survey-builder/modify-survey-form";
+import NewSurveyGroup from "@/components/dashboard/survey-builder/new-survey-group";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PrismaClient } from "@prisma/client";
+import { DeleteIcon } from "lucide-react";
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 
 interface SurveyBuilderPageProps {
   params: {
     id: string;
   };
 }
-
 const prisma = new PrismaClient();
 
 export default async function SurveyBuilderPage({
   params,
 }: SurveyBuilderPageProps) {
   const survey = await prisma.survey.findUnique({ where: { id: params.id } });
+  const groups = await prisma.surveyGroup.findMany({
+    where: { surveyId: params.id },
+  });
+
+  async function deleteSurvey() {
+    "use server";
+    await prisma.survey.delete({ where: { id: params.id } });
+    revalidatePath("/dashboard");
+    redirect("/dashboard");
+  }
 
   return (
-    <div className="max-w-4xl mx-auto px-2 my-10">
+    <div className="max-w-4xl mx-auto px-6 my-10">
       <h1 className="text-3xl font-bold mb-12">Modify Your Survey</h1>
 
       <ModifySurveyForm
@@ -25,6 +39,41 @@ export default async function SurveyBuilderPage({
         description={survey.description}
         id={params.id}
       />
+
+      <div className="flex items-center flex-row justify-between">
+        <h1 className="text-2xl font-semibold mt-12 mb-6">Survey Groups</h1>
+        <NewSurveyGroup surveyId={params.id} />
+      </div>
+      {groups.length === 0 ? (
+        <p className="text-muted-foreground">
+          Your survey is currently empty, add a new group right now!
+        </p>
+      ) : (
+        groups.map((group) => <GroupBuilder key={group.id} {...group} />)
+      )}
+
+      <div className="flex items-center flex-row justify-between">
+        <h1 className="text-2xl font-semibold mt-12 mb-6">Danger Zone</h1>
+      </div>
+
+      <Card className="border-destructive pt-6">
+        <CardContent className="flex flex-row justify-between">
+          <div>
+            <h1 className="text-xl font-semibold">Delete Survey</h1>
+            <h2 className="text-destructive-foreground">
+              This operations cannot be undone and it will delete all the
+              responses of this survey too.
+            </h2>
+          </div>
+
+          <form action={deleteSurvey}>
+            <Button variant="destructive" type="submit">
+              <DeleteIcon className="mr-2" />
+              Delete
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
