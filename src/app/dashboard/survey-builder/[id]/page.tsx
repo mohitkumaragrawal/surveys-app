@@ -1,6 +1,7 @@
 import GroupBuilder from "@/components/dashboard/survey-builder/group-builder";
 import ModifySurveyForm from "@/components/dashboard/survey-builder/modify-survey-form";
 import NewSurveyGroup from "@/components/dashboard/survey-builder/new-survey-group";
+import DeleteConfirm from "@/components/delete-confirm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PrismaClient } from "@prisma/client";
@@ -21,6 +22,7 @@ export default async function SurveyBuilderPage({
   const survey = await prisma.survey.findUnique({ where: { id: params.id } });
   const groups = await prisma.surveyGroup.findMany({
     where: { surveyId: params.id },
+    orderBy: { order: "asc" },
   });
 
   async function deleteSurvey() {
@@ -60,18 +62,18 @@ export default async function SurveyBuilderPage({
         <CardContent className="flex flex-row justify-between">
           <div>
             <h1 className="text-xl font-semibold">Delete Survey</h1>
-            <h2 className="text-destructive-foreground">
+            <h2 className="text-destructive">
               This operations cannot be undone and it will delete all the
               responses of this survey too.
             </h2>
           </div>
 
-          <form action={deleteSurvey}>
+          <DeleteConfirm action={deleteSurvey}>
             <Button variant="destructive" type="submit">
               <DeleteIcon className="mr-2" />
               Delete
             </Button>
-          </form>
+          </DeleteConfirm>
         </CardContent>
       </Card>
     </div>

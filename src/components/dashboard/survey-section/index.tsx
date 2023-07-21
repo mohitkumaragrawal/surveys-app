@@ -15,6 +15,7 @@ export default async function SurveySection() {
 
   const surveys = await prisma.survey.findMany({
     where: { userId: session?.user?.id },
+    orderBy: { createdAt: "desc" },
   });
 
   return (

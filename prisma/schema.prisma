@@ -65,6 +65,8 @@ model Survey {
   owner       User          @relation(fields: [userId], references: [id])
   userId      String
   SurveyGroup SurveyGroup[]
+
+  createdAt DateTime @default(now())
 }
 
 // A table to group a bunch of questions together
@@ -73,7 +75,9 @@ model SurveyGroup {
   title       String
   description String?
 
-  survey Survey @relation(fields: [surveyId], references: [id])
+  survey Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+
+  order Int @default(autoincrement())
 
   Question Question[]
   surveyId String
@@ -90,6 +94,8 @@ model Question {
 
   group SurveyGroup @relation(fields: [surveyGroupId], references: [id])
 
+  order Int @default(autoincrement())
+
   QuestionOptions QuestionOptions[]
   surveyGroupId   String
   Answer          Answer[]
@@ -101,6 +107,8 @@ model QuestionOptions {
   value      String
   question   Question @relation(fields: [questionId], references: [id])
   questionId String
+
+  order Int @default(autoincrement())
 }
 
 model Answer {
