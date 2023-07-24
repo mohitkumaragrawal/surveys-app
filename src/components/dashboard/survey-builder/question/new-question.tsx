@@ -12,7 +12,7 @@ interface Props {
   surveyId: string;
 }
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default function NewQuestion({ groupId, surveyId }: Props) {
   async function addQuestion(data: QuestionSchema) {

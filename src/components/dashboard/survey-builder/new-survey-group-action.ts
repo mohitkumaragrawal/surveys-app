@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import newSurveyGroupSchema from "./new-survey-group-schema";
 import { revalidatePath } from "next/cache";
 
-const client = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function newSurveyGroupAction(data: FormData) {
   const title = data.get("title") as string;
@@ -18,7 +18,7 @@ export default async function newSurveyGroupAction(data: FormData) {
       surveyId,
     });
 
-    await client.surveyGroup.create({
+    await prisma.surveyGroup.create({
       data: {
         title,
         description,

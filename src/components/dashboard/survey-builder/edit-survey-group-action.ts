@@ -4,7 +4,7 @@ import { PrismaClient } from "@prisma/client";
 import editSurveyGroupSchema from "./edit-survey-group-schema";
 import { revalidatePath } from "next/cache";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function editSurveyGroupAction(data: FormData) {
   const surveyGroupId = data.get("surveyGroupId") as string;

@@ -50,9 +50,6 @@ export default function ModifySurveyForm({ id, title, description }: Props) {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Survey Headers</CardTitle>
-      </CardHeader>
       <Form {...form}>
         <form
           className="mt-4"

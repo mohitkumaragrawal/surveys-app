@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import NewSurveyDialog from "./new-survey-dialog";
 import Link from "next/link";
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function SurveySection() {
   const session = await getServerSession(authOptions);

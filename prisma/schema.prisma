@@ -44,8 +44,9 @@ model User {
   accounts      Account[]
   sessions      Session[]
 
-  Survey Survey[]
-  Answer Answer[]
+  Survey      Survey[]
+  Answer      Answer[]
+  UserReponse UserReponse[]
 }
 
 model VerificationToken {
@@ -62,11 +63,12 @@ model Survey {
   description String?
 
   // User who got edit rights, and right to see the responses
-  owner       User          @relation(fields: [userId], references: [id])
+  owner       User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId      String
   SurveyGroup SurveyGroup[]
 
-  createdAt DateTime @default(now())
+  createdAt   DateTime      @default(now())
+  UserReponse UserReponse[]
 }
 
 // A table to group a bunch of questions together
@@ -92,7 +94,7 @@ model Question {
   type     String
   required Boolean
 
-  group SurveyGroup @relation(fields: [surveyGroupId], references: [id])
+  group SurveyGroup @relation(fields: [surveyGroupId], references: [id], onDelete: Cascade)
 
   order Int @default(autoincrement())
 
@@ -105,7 +107,7 @@ model QuestionOptions {
   id         String   @id @default(cuid())
   display    String
   value      String
-  question   Question @relation(fields: [questionId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId String
 
   order Int @default(autoincrement())
@@ -114,11 +116,25 @@ model QuestionOptions {
 model Answer {
   id String @id @default(cuid())
 
-  user     User     @relation(fields: [userId], references: [id])
-  question Question @relation(fields: [questionId], references: [id])
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
 
   value String
 
   userId     String
   questionId String
+
+  // A user can answer a particular question only once
+  @@unique([userId, questionId])
+}
+
+model UserReponse {
+  id String @id @default(cuid())
+
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  survey   Survey @relation(fields: [surveyId], references: [id], onDelete: Cascade)
+  userId   String
+  surveyId String
+
+  @@unique([userId, surveyId])
 }

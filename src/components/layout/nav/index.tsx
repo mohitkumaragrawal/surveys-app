@@ -1,7 +1,12 @@
 import Profile from "./profile";
 import ModeToggle from "./mode-toggle";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export function NavBar() {
+export async function NavBar() {
+  const session = await getServerSession(authOptions);
+  const status = session && session.user ? "authenticated" : "unauthenticated";
+
   return (
     <nav className="border-b px-5 py-3 flex items-center justify-between">
       <span className="text-2xl font-bold">
@@ -11,7 +16,7 @@ export function NavBar() {
 
       <div className="flex items-center gap-3">
         <ModeToggle />
-        <Profile />
+        <Profile session={session} status={status} />
       </div>
     </nav>
   );

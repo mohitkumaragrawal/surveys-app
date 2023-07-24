@@ -13,7 +13,7 @@ type Props = QuestionSchema & {
   order: number;
 };
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default function Question(props: Props) {
   async function moveUp() {

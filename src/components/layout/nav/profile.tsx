@@ -16,9 +16,14 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 
-export default function Profile() {
-  const { data: session, status } = useSession();
+import type { Session } from "next-auth";
 
+interface Props {
+  session: Session;
+  status: string;
+}
+
+export default function Profile({ session, status }: Props) {
   if (status === "unauthenticated") {
     return (
       <div>
@@ -27,11 +32,6 @@ export default function Profile() {
         </Link>
       </div>
     );
-  }
-
-  if (status === "loading") {
-    // Maybe add a loading spinner
-    return <Loader2 className="animate-spin" />;
   }
 
   const handleLogout = () => {

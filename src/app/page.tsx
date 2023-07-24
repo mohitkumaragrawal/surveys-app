@@ -3,10 +3,10 @@ import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 
+import prisma from "@/lib/prisma";
 const Home = async () => {
   const session = await getServerSession(authOptions);
 
-  const prisma = new PrismaClient();
   const users = await prisma.user.findMany({ include: { accounts: true } });
 
   return (

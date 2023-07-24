@@ -13,7 +13,18 @@ import { Separator } from "@/components/ui/separator";
 
 import { signIn } from "next-auth/react";
 
-export default function SigninPage() {
+interface Props {
+  searchParams?: {
+    callbackUrl?: string;
+  };
+}
+
+export default function SigninPage(props: Props) {
+  let callbackUrl = props.searchParams?.callbackUrl;
+  if (!callbackUrl) {
+    callbackUrl = process.env.NEXTAUTH_URL;
+  }
+
   return (
     <Card className="max-w-sm m-auto my-8">
       <CardHeader className="font-bold text-2xl">Sign in</CardHeader>
@@ -30,9 +41,7 @@ export default function SigninPage() {
         <Button
           variant="outline"
           className="w-full bg-opacity-80 bg-white justify-start hover:bg-slate-200"
-          onClick={() =>
-            signIn("google", { callbackUrl: process.env.NEXTAUTH_URL })
-          }
+          onClick={() => signIn("google", { callbackUrl })}
         >
           <FcGoogle className="mr-2 w-6 h-6" />
           <span className="flex-1 text-center text-black">

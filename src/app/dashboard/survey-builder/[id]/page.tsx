@@ -4,8 +4,10 @@ import NewSurveyGroup from "@/components/dashboard/survey-builder/new-survey-gro
 import DeleteConfirm from "@/components/delete-confirm";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
 import { DeleteIcon } from "lucide-react";
+import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -14,12 +16,23 @@ interface SurveyBuilderPageProps {
     id: string;
   };
 }
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 export default async function SurveyBuilderPage({
   params,
 }: SurveyBuilderPageProps) {
+  // guard
+  const session = await getServerSession(authOptions);
+  if (!session || !session.user) {
+    // un authenticated
+    return redirect("/");
+  }
+
   const survey = await prisma.survey.findUnique({ where: { id: params.id } });
+  if (!survey || survey.userId !== session.user.id) {
+    return redirect("/dashboard");
+  }
+
   const groups = await prisma.surveyGroup.findMany({
     where: { surveyId: params.id },
     orderBy: { order: "asc" },
@@ -27,6 +40,12 @@ export default async function SurveyBuilderPage({
 
   async function deleteSurvey() {
     "use server";
+
+    const sess = await getServerSession(authOptions);
+    if (!sess || !sess.user || sess.user.id !== survey.userId) {
+      return;
+    }
+
     await prisma.survey.delete({ where: { id: params.id } });
     revalidatePath("/dashboard");
     redirect("/dashboard");

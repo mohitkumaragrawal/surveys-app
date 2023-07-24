@@ -13,6 +13,11 @@ import { revalidatePath } from "next/cache";
 import NewQuestion from "./question/new-question";
 import DeleteConfirm from "@/components/delete-confirm";
 import Question from "./question/question";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 interface Props {
   id: string;
@@ -21,7 +26,7 @@ interface Props {
   surveyId: string;
 }
 
-const prisma = new PrismaClient();
+import prisma from "@/lib/prisma";
 
 function MoveButtons({ groupId }: { groupId: string }) {
   async function moveUp() {
@@ -114,51 +119,57 @@ export default async function GroupBuilder({
   }
 
   return (
-    <Card className="my-3">
-      <CardHeader className="flex flex-row justify-between items-center">
-        <div>
-          <CardTitle>{title}</CardTitle>
-          <p className="text-muted-foreground mt-2">{description}</p>
-        </div>
+    <Card className="my-3 overflow-hidden">
+      <Collapsible>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="flex flex-row justify-between items-center hover:bg-muted transition cursor-pointer overflow-hidden">
+            <div className="cursor-pointer">
+              <CardTitle>{title}</CardTitle>
+              <p className="text-muted-foreground mt-2">{description}</p>
+            </div>
 
-        <div className="flex flex-row gap-2">
-          <EditSurveyGroup
-            surveyGroupId={id}
-            title={title}
-            description={description}
-          />
-          <DeleteConfirm action={deleteThis}>
-            <Button type="submit" variant="destructive" className="ml-2">
-              <DeleteIcon className="w-5 h-5" />
-            </Button>
-          </DeleteConfirm>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {questions.length === 0 ? (
-          <p className="text-muted-foreground">
-            This group is currently empty, add a new question right now!
-          </p>
-        ) : (
-          questions.map((question) => (
-            <Question
-              key={question.id}
-              surveyId={surveyId}
-              groupId={id}
-              id={question.id}
-              description={question.description}
-              required={question.required}
-              title={question.title}
-              type={question.type as any}
-              order={question.order}
-            />
-          ))
-        )}
-      </CardContent>
-      <CardFooter className="gap-5">
-        <NewQuestion groupId={id} surveyId={surveyId} />
-        <MoveButtons groupId={id} />
-      </CardFooter>
+            <div className="flex flex-row gap-2">
+              <EditSurveyGroup
+                surveyGroupId={id}
+                title={title}
+                description={description}
+              />
+              <DeleteConfirm action={deleteThis}>
+                <Button type="submit" variant="destructive" className="ml-2">
+                  <DeleteIcon className="w-5 h-5" />
+                </Button>
+              </DeleteConfirm>
+            </div>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent>
+            {questions.length === 0 ? (
+              <p className="text-muted-foreground">
+                This group is currently empty, add a new question right now!
+              </p>
+            ) : (
+              questions.map((question) => (
+                <Question
+                  key={question.id}
+                  surveyId={surveyId}
+                  groupId={id}
+                  id={question.id}
+                  description={question.description}
+                  required={question.required}
+                  title={question.title}
+                  type={question.type as any}
+                  order={question.order}
+                />
+              ))
+            )}
+          </CardContent>
+          <CardFooter className="gap-5">
+            <NewQuestion groupId={id} surveyId={surveyId} />
+            <MoveButtons groupId={id} />
+          </CardFooter>
+        </CollapsibleContent>
+      </Collapsible>
     </Card>
   );
 }
