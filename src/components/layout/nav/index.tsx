@@ -10,7 +10,7 @@ export async function NavBar() {
   return (
     <nav className="border-b px-5 py-3 flex items-center justify-between">
       <span className="text-2xl font-bold">
-        notes
+        surveys
         <span className="text-orange-400">app</span>
       </span>
 
