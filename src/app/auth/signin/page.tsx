@@ -32,9 +32,9 @@ export default function SigninPage(props: Props) {
         <p>Signin please</p>
       </CardContent>
       <CardFooter className="flex flex-col gap-2">
-        <Button variant="secondary" className="w-full">
+        {/* <Button variant="secondary" className="w-full">
           Sign in
-        </Button>
+        </Button> */}
 
         <Separator className="my-3" />
 
