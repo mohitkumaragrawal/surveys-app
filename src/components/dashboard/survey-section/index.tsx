@@ -9,6 +9,7 @@ import NewSurveyDialog from "./new-survey-dialog";
 import Link from "next/link";
 
 import prisma from "@/lib/prisma";
+import CopyLinkButton from "./copy-link-button";
 
 export default async function SurveySection() {
   const session = await getServerSession(authOptions);
@@ -16,10 +17,36 @@ export default async function SurveySection() {
   const surveys = await prisma.survey.findMany({
     where: { userId: session?.user?.id },
     orderBy: { createdAt: "desc" },
+    include: { UserReponse: true },
   });
 
+  const getResponseMessage = (
+    count: number,
+    surveyId: string
+  ): React.ReactNode => {
+    let text = "";
+    if (count === 0) {
+      text = "no responses yet";
+      return text;
+    } else if (count === 1) {
+      text = "1 response";
+    } else {
+      text = `${count} responses`;
+    }
+
+    return (
+      <Link
+        href={`/api/download/${surveyId}`}
+        download
+        className="underline text-blue-500"
+      >
+        {text}
+      </Link>
+    );
+  };
+
   return (
-    <Card>
+    <Card className="max-w-3xl mx-auto my-[3rem]">
       <CardHeader className="flex flex-row justify-between items-center">
         <h2 className="text-2xl font-semibold">Your Surveys</h2>
         <NewSurveyDialog />
@@ -31,15 +58,24 @@ export default async function SurveySection() {
         ) : null}
 
         {surveys.map((survey) => (
-          <Link href={`/dashboard/survey-builder/${survey.id}`} key={survey.id}>
-            <Button
-              variant="secondary"
-              className="p-8 py-12 flex flex-col m-4 text-left items-start space-y-1 w-full"
-            >
-              <p className="text-xl">{survey.title}</p>
-              <p className="text-sm space-y-2">{survey.description}</p>
-            </Button>
-          </Link>
+          <div className="px-4 py-4 border rounded m-5" key={survey.id}>
+            <p className="text-xl font-bold">{survey.title}</p>
+            <p className="text-sm text-muted-foreground">
+              {survey.description}
+            </p>
+
+            <p className="font-semibold mt-3">
+              You have got{" "}
+              {getResponseMessage(survey.UserReponse.length, survey.id)}
+            </p>
+
+            <div className="flex mt-5 flex-row gap-4">
+              <Link href={`/dashboard/survey-builder/${survey.id}`}>
+                <Button>Edit</Button>
+              </Link>
+              <CopyLinkButton surveyId={survey.id} />
+            </div>
+          </div>
         ))}
       </CardContent>
     </Card>
