@@ -46,9 +46,12 @@ export default async function SurveyBuilderPage({
       return;
     }
 
-    await prisma.survey.delete({ where: { id: params.id } });
+    try {
+      await prisma.survey.delete({ where: { id: params.id } });
+    } catch (e) {}
+
     revalidatePath("/dashboard");
-    redirect("/dashboard");
+    return redirect("/dashboard");
   }
 
   return (

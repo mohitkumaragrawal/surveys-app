@@ -5,7 +5,10 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "../ui/use-toast";
 
 interface Props {
-  questionIds: string[];
+  questionIds: Array<{
+    id: string;
+    required: boolean;
+  }>;
   handleSubmit: any;
 }
 
@@ -14,20 +17,31 @@ export default function SuveySubmit({ questionIds, handleSubmit }: Props) {
   const { toast } = useToast();
 
   const submit = () => {
-    toast({
-      title: "Submitting...",
-    });
-    startTransition(async () => {
-      const response: { [questionId: string]: string } = {};
-      questionIds.forEach((questionId) => {
-        const data = localStorage.getItem(questionId);
-        if (data) {
-          response[questionId] = data;
-        }
-      });
+    // toast({
+    //   title: "Submitting...",
+    // });
+    const response: { [questionId: string]: string } = {};
 
-      await handleSubmit(response);
-    });
+    let check = true;
+    for (let question of questionIds) {
+      const data = localStorage.getItem(question.id);
+      if (data) {
+        response[question.id] = data;
+      } else if (question.required) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Please fill out all required questions",
+        });
+        check = false;
+        break;
+      }
+    }
+    if (check) {
+      startTransition(async () => {
+        await handleSubmit(response);
+      });
+    }
   };
 
   return (

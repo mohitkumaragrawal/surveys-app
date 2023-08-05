@@ -24,8 +24,8 @@ export default function DeleteConfirm(props: Props) {
   const [waiting, startTransition] = useTransition();
 
   const handleAction = () => {
-    startTransition(() => {
-      props.action();
+    startTransition(async () => {
+      await props.action();
     });
   };
 

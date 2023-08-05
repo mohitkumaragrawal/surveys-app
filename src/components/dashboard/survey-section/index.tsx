@@ -35,13 +35,13 @@ export default async function SurveySection() {
     }
 
     return (
-      <Link
+      <a
         href={`/api/download/${surveyId}`}
         download
         className="underline text-blue-500"
       >
         {text}
-      </Link>
+      </a>
     );
   };
 

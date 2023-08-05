@@ -40,7 +40,7 @@ export default async function SurveyPage(props: { params: { id: string } }) {
   const questions = [];
   survey.SurveyGroup.forEach((group) => {
     group.Question.forEach((question) => {
-      questions.push(question.id);
+      questions.push({ id: question.id, required: question.required });
     });
   });
 
