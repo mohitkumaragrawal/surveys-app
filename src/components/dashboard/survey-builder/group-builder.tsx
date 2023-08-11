@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import { ArrowDown, ArrowUp, DeleteIcon, PlusIcon } from "lucide-react";
 import EditSurveyGroup from "./edit-survey-group";
-import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import NewQuestion from "./question/new-question";
 import DeleteConfirm from "@/components/delete-confirm";
@@ -27,6 +26,7 @@ interface Props {
 }
 
 import prisma from "@/lib/prisma";
+import QuestionList from "./question/question-list";
 
 function MoveButtons({ groupId }: { groupId: string }) {
   async function moveUp() {
@@ -149,19 +149,11 @@ export default async function GroupBuilder({
                 This group is currently empty, add a new question right now!
               </p>
             ) : (
-              questions.map((question) => (
-                <Question
-                  key={question.id}
-                  surveyId={surveyId}
-                  groupId={id}
-                  id={question.id}
-                  description={question.description}
-                  required={question.required}
-                  title={question.title}
-                  type={question.type as any}
-                  order={question.order}
-                />
-              ))
+              <QuestionList
+                questions={questions}
+                groupId={id}
+                surveyId={surveyId}
+              />
             )}
           </CardContent>
           <CardFooter className="gap-5">

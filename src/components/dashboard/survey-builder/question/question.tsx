@@ -1,99 +1,90 @@
-import { PrismaClient } from "@prisma/client";
+"use client";
+
 import type { QuestionSchema } from "./question-schema";
-import { revalidatePath } from "next/cache";
 import { Button } from "@/components/ui/button";
 import { ArrowDown, ArrowUp } from "lucide-react";
 import DeleteConfirm from "@/components/delete-confirm";
 import QuestionSheet from "./question-sheet";
+
+import * as actions from "./actions";
+
+import { experimental_useOptimistic as useOptimistic } from "react";
 
 type Props = QuestionSchema & {
   id: string;
   surveyId: string;
   groupId: string;
   order: number;
+
+  optimisticMoveUp: (id: string) => void;
+  optimisticMoveDown: (id: string) => void;
+  optimisticDelete: (id: string) => void;
 };
 
-import prisma from "@/lib/prisma";
-
 export default function Question(props: Props) {
+  const [data, setData] = useOptimistic(
+    {
+      title: props.title,
+      description: props.description,
+      type: props.type,
+      required: props.required,
+    },
+    (state, data: QuestionSchema) => {
+      return data;
+    }
+  );
+
   async function moveUp() {
-    "use server";
+    props.optimisticMoveUp(props.id);
 
-    const otherQuestion = await prisma.question.findFirst({
-      where: {
-        surveyGroupId: props.groupId,
-        order: { lt: props.order },
-      },
-      orderBy: { order: "desc" },
+    await actions.moveUp({
+      id: props.id,
+      groupId: props.groupId,
+      order: props.order,
+      surveyId: props.surveyId,
     });
-    if (!otherQuestion) return;
-    await prisma.question.update({
-      where: { id: props.id },
-      data: { order: otherQuestion.order },
-    });
-    await prisma.question.update({
-      where: { id: otherQuestion.id },
-      data: { order: props.order },
-    });
-
-    revalidatePath(`/dashboard/survey-builder/${props.surveyId}`);
   }
 
   async function moveDown() {
-    "use server";
+    props.optimisticMoveDown(props.id);
 
-    const otherQuestion = await prisma.question.findFirst({
-      where: {
-        surveyGroupId: props.groupId,
-        order: { gt: props.order },
-      },
-      orderBy: { order: "asc" },
+    await actions.moveDown({
+      id: props.id,
+      groupId: props.groupId,
+      order: props.order,
+      surveyId: props.surveyId,
     });
-    if (!otherQuestion) return;
-    await prisma.question.update({
-      where: { id: props.id },
-      data: { order: otherQuestion.order },
-    });
-    await prisma.question.update({
-      where: { id: otherQuestion.id },
-      data: { order: props.order },
-    });
-    revalidatePath(`/dashboard/survey-builder/${props.surveyId}`);
   }
 
   async function deleteQuestion() {
-    "use server";
-    await prisma.question.delete({ where: { id: props.id } });
-    revalidatePath(`/dashboard/survey-builder/${props.surveyId}`);
+    props.optimisticDelete(props.id);
+
+    await actions.deleteQuestion(props.id, props.surveyId);
   }
 
   async function editQuestion(data: QuestionSchema) {
-    "use server";
-    await prisma.question.update({
-      where: { id: props.id },
-      data,
-    });
-    revalidatePath(`/dashboard/survey-builder/${props.surveyId}`);
+    setData(data);
+    await actions.editQuestion(props.id, props.surveyId, data);
   }
 
   return (
     <div className="border rounded p-4 my-2 flex justify-between items-center">
       <div>
         <h3 className="text-lg font-semibold">
-          {props.title}
-          <span className="text-red-500">{props.required && "*"}</span>
-          <span className="text-muted-foreground text-sm"> ({props.type})</span>
+          {data.title}
+          <span className="text-red-500">{data.required && "*"}</span>
+          <span className="text-muted-foreground text-sm"> ({data.type})</span>
         </h3>
-        <h4 className="text-muted-foreground">{props.description}</h4>
+        <h4 className="text-muted-foreground">{data.description}</h4>
         <div className="mt-4">
           <QuestionSheet
             action={editQuestion}
             title="Edit Question"
             defaultValues={{
-              title: props.title,
-              description: props.description,
-              type: props.type,
-              required: props.required,
+              title: data.title,
+              description: data.description,
+              type: data.type,
+              required: data.required,
             }}
           >
             <Button className="mr-2">Edit</Button>

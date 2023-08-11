@@ -38,7 +38,7 @@ import { Switch } from "@/components/ui/switch";
 type QuestionSchema = z.infer<typeof questionSchema>;
 
 type Props = {
-  action: (data: QuestionSchema) => void;
+  action: (data: QuestionSchema) => Promise<any>;
   children: React.ReactNode;
   defaultValues: QuestionSchema;
   title: string;
@@ -62,8 +62,8 @@ export default function QuestionSheet({
     e.preventDefault();
     setOpen(false);
 
-    startTransition(() => {
-      action(form.getValues());
+    startTransition(async () => {
+      await action(form.getValues());
       form.reset({ title: "", description: "", type: "text", required: false });
     });
 
